@@ -14,6 +14,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.officeapp.ui.theme.OfficeAppTheme
+import com.example.officeapp.utils.getUsers
+
+//import com.example.officeapp.utils.getUsers
 
 class MainActivity : ComponentActivity() {
 
@@ -31,7 +34,9 @@ class MainActivity : ComponentActivity() {
               //  setUpNavGraph(navController = navController)
 
                 //AdminData(navController)
-                oneTimeRequest()
+               // oneTimeRequest()
+
+               getUsers()
 
 
 
