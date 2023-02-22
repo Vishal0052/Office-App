@@ -36,7 +36,7 @@ fun getUsersList():List<userData>{
 }
 
 @Composable
-fun ProjectItems(userdata : userData,passinguserdata:(userData)->Unit) {
+fun ProjectItems(userdata : userData,passinguserdata:(userData)->Unit,onDeleteItem:()->Unit) {
 
 
     Row(modifier= Modifier
@@ -49,15 +49,13 @@ fun ProjectItems(userdata : userData,passinguserdata:(userData)->Unit) {
         }
         IconButton(onClick = {
             passinguserdata(userdata)
+            onDeleteItem()
         }) {
             Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion")
         }
 
 
     }
-
-
-
 
 }
 @Composable
@@ -81,9 +79,11 @@ Column(modifier = Modifier.fillMaxSize()) {
                     enter = expandVertically(),
                     exit = shrinkVertically(animationSpec = tween(1000))
                 ) {
-                    ProjectItems(item){
-                        deletedItem.add(it)
-                    }
+                    ProjectItems(item,{passinguserdata->
+                        deletedItem.add(passinguserdata)
+                    },{
+
+                    })
 
                 }
 

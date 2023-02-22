@@ -27,8 +27,10 @@ import androidx.compose.ui.unit.sp
 import com.example.officeapp.utils.Utils
 import com.example.officeapp.utils.showError
 
+@Preview
 @Composable
-fun oneTimeRequest(){
+fun OneTimeRequest(){
+
     Column(verticalArrangement = Arrangement.Center
     , horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -141,5 +143,5 @@ isError = isErrornewpassword,
 @Preview
 @Composable
 fun show(){
-    oneTimeRequest()
+    OneTimeRequest()
 }

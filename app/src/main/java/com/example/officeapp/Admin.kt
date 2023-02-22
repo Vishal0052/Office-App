@@ -33,7 +33,7 @@ fun AdminData(navController: NavController){
     courseList = ArrayList<GridModel>()
     courseList= getItemData()
 
-    val context = LocalContext.current.applicationContext
+    val context = LocalContext.current
 
     Column() {
         TopAppBar(title = {Text(text = "Admin Panel")},
