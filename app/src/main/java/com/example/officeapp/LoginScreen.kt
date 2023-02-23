@@ -44,10 +44,8 @@ import com.google.gson.Gson
 
 
 @Composable
-fun login(navController: NavController,loginViewModel: LoginViewModel = hiltViewModel()) {
+fun login(loginViewModel: LoginViewModel ) {
     Log.v("Com","Inflate..")
-     var mContext = LocalContext.current
-
     val Teal200 = "#20d9f8"
     var isErroremail by remember {
         mutableStateOf(false)
@@ -55,7 +53,7 @@ fun login(navController: NavController,loginViewModel: LoginViewModel = hiltView
     var isErrorpassword by remember {
         mutableStateOf(false)
     }
-    getApiResponse(loginViewModel,mContext,navController)
+
 
     val context = LocalContext.current
     Column(
@@ -127,14 +125,8 @@ fun login(navController: NavController,loginViewModel: LoginViewModel = hiltView
 
 
         Button(onClick = {
-
                 if (checkEmail(email, context) && checkPassword(passWord, context)) {
-
-
                     loginViewModel.loginUser(LoginDataModel(email,passWord))
-
-
-
                 }
 
 
@@ -159,31 +151,5 @@ fun login(navController: NavController,loginViewModel: LoginViewModel = hiltView
 fun Display() {
   //login(navController = rememberNavController() ,  loginViewModel = LoginViewModel())
 
-}
-
-
-fun getApiResponse(loginViewModel:  LoginViewModel , mContext: Context, navController: NavController){
-
-    val result = loginViewModel.loginResponse.value
-
-    Log.d("LoginScreen", "getApiResponse: ${Gson().toJson(result)}")
-    when(result){
-        is Resource.Success -> {
-           if(result.data?.payload?.userInfo?.role=="ADMIN"){
-               navController.navigate(Screen.Admin.route)
-           }
-
-        }
-        is Resource.Error -> {
-            Toast.makeText(mContext,"${result.message}",Toast.LENGTH_SHORT).show()
-
-
-        }
-        is Resource.loading -> {
-            Log.e("REsponse","loading")
-
-            Toast.makeText(mContext,"Loading",Toast.LENGTH_SHORT).show()
-        }
-    }
 }
 

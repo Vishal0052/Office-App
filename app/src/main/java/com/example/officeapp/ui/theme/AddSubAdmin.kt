@@ -1,6 +1,7 @@
 package com.example.officeapp.ui.theme
 
 import android.content.Context
+import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -25,13 +26,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.officeapp.model.CreateUser
+import com.example.officeapp.utils.Constants
 import com.example.officeapp.utils.showError
+import com.example.officeapp.viewmodels.LoginViewModel
 
 
 @Composable
-fun RegisterSubAdmin(navController: NavController){
+fun RegisterSubAdmin(navController: NavController,loginViewModel: LoginViewModel){
 
 
 
@@ -170,7 +175,14 @@ fun RegisterSubAdmin(navController: NavController){
             Button(onClick = {
 
                              if(checkEmpty(email, context,name,designation)){
-                                 Toast.makeText(context, "Registration Sucess", Toast.LENGTH_SHORT).show()
+
+                                 var testToken = loginViewModel.getValueFromPref(Constants.AUTH_TOKEN)
+                                 // Toast.makeText(context, "Registration Sucess", Toast.LENGTH_SHORT).show()
+                                 testToken?.let {
+                                     Log.e("AccessToken",it)
+                                     loginViewModel.createUser(it, CreateUser(name,email,designation,selectedRole))
+                                 }
+
                              }
 
             }, modifier = Modifier
@@ -207,5 +219,5 @@ fun checkEmpty(email: String, context: Context, name: String, designation:String
 @Preview
 @Composable
 fun display(){
-    RegisterSubAdmin(navController = rememberNavController())
+   // RegisterSubAdmin(navController = rememberNavController())
 }
