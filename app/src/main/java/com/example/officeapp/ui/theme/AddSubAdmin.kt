@@ -178,6 +178,9 @@ fun RegisterSubAdmin(navController: NavController,loginViewModel: LoginViewModel
 
                                  var testToken = loginViewModel.getValueFromPref(Constants.AUTH_TOKEN)
                                  // Toast.makeText(context, "Registration Sucess", Toast.LENGTH_SHORT).show()
+
+                                 // in below line we check if our token is not null ten we call this fun
+
                                  testToken?.let {
                                      Log.e("AccessToken",it)
                                      loginViewModel.createUser(it, CreateUser(name,email,designation,selectedRole))

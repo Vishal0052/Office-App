@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.officeapp.ui.theme.RegisterSubAdmin
 import com.example.officeapp.utils.Constants
+import com.example.officeapp.utils.GetUsers
 import com.example.officeapp.utils.Resource
 import com.example.officeapp.viewmodels.LoginViewModel
 
@@ -19,12 +20,12 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
 
     when(val result = viewModel.loginResponse.value) {
         is Resource.Success -> {
-            result.data?.payload?.let {
+            result.data?.payload?.let { // here we check our resut paylod is not null tahn we move forward
                 viewModel.saveValueInPref(Constants.AUTH_TOKEN,it.accesstoken)
                 viewModel.saveUserDetails()
             }
             if (result.data?.payload?.userInfo?.role == "ADMIN") {
-                navController.navigate(Screen.AddSubAdmin.route)
+                navController.navigate(Screen.Admin.route)
             }
         }
         is Resource.Error -> {
@@ -59,6 +60,9 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
 
 
 
+
+
+
     NavHost(navController = navController, startDestination = Screen.splash.route){
 
         composable(route = Screen.splash.route){
@@ -70,10 +74,13 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
         }
 
         composable(route=Screen.Admin.route){
-            AdminData(navController)
+            AdminData(navController,viewModel)
         }
         composable(route=Screen.AddSubAdmin.route){
             RegisterSubAdmin(navController,viewModel)
+        }
+        composable(route=Screen.UsersDetail.route){
+            GetUsers(viewModel)
         }
     }
 

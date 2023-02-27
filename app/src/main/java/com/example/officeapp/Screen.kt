@@ -5,4 +5,6 @@ sealed class Screen(var route :String) {
     object login:Screen("login_screen")
     object Admin:Screen("admin_screen")
     object AddSubAdmin:Screen("Add_Sub_Admin_screen")
+
+    object UsersDetail:Screen("Users_Detail")
 }

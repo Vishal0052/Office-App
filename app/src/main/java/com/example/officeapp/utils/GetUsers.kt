@@ -1,16 +1,12 @@
 package com.example.officeapp.utils
 
-import android.service.autofill.UserData
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -18,120 +14,154 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.officeapp.model.userData
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
+import com.example.officeapp.model.UserData
+import com.example.officeapp.model.userData.Payload
+import com.example.officeapp.viewmodels.LoginViewModel
 
 
-fun getUsersList(): List<userData> {
-    return listOf(
-        userData(name = "vishal", designation = "Software Developer Intern "),
-        userData(name = "Media Player App", designation = "Listen Music Endlesly"),
-        userData(name = "Gaming Media App", designation = "Playing with Friend with your Friend"),
-        userData(name = "Social Media App", designation = "Connect with your Friend"),
-        userData(name = "Media Player App", designation = "Listen Music Endlesly"),
-        userData(name = "Gaming Media App", designation = "Playing with Friend with your Friend")
-
-    )
-
-}
 
 @Composable
 fun ProjectItems(
-    userdata: userData,
-    passinguserdata: (userData) -> Unit,
-    onDeleteItem: () -> Unit
-) {
+    userdata : Payload,
+
+    ) {
 
 
-//    Row(modifier= Modifier
-//        .fillMaxWidth()
-//        .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
-//        , horizontalArrangement = Arrangement.SpaceBetween) {
-//        Column(modifier= Modifier.padding(end = 10.dp)) {
-//            Text(text = userdata.name, style = MaterialTheme.typography.h6)
-//            Text(text = userdata.designation, style = MaterialTheme.typography.body1)
-//        }
-//        IconButton(onClick = {
-//            passinguserdata(userdata)
-//            onDeleteItem()
-//        }) {
-//            Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion")
-//        }
-//
-//
-//    }
+    var expanded by remember{ mutableStateOf(false) }
+    
+    Card( modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 20.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = 3.dp) {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+        ) {
 
-    var expanded by remember { mutableStateOf(false) }
-    Card(
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth()
-            .clickable {},
-        shape = RoundedCornerShape(corner = CornerSize(16.dp)), elevation = 6.dp
-    )
-    {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Surface(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(100.dp),
-                shape = RectangleShape,
-                elevation = 4.dp
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                Icon(imageVector = Icons.Default.AccountBox, contentDescription = "Movie Image")
+
+
+                Text(
+                    text = userdata.name,
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp, modifier = Modifier.weight(0.6F)
+                )
+
+                Text(
+                    text = userdata.designation,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,modifier = Modifier.weight(0.4F)
+                )
+
+
+
             }
 
-            Column(modifier = Modifier
-                .padding(start = 24.dp)
-                .align(Alignment.Center)) {
-                Text(text = userdata.name)
-                Text(text = userdata.designation)
-                Text(text = userdata.name)
+            Row(horizontalArrangement = Arrangement.Center
+                  , verticalAlignment = Alignment.CenterVertically ){
 
-                Icon(
-                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = "Down Arrow",
+                Text(
+                    text = "Available",
+                    fontStyle = FontStyle.Italic,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Green,
+                    fontSize = 20.sp ,modifier = Modifier.weight(0.6F), textAlign = TextAlign.Start
+                )
+
+                IconButton(onClick = {
+
+                }) {
+                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion",
+                        modifier = Modifier
+                            .size(20.dp)
+                            .weight(0.4F)            )
+                }
+
+
+            }
+
+
+            Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                AnimatedVisibility(visible = expanded) {
+
+
+                    Column {
+
+                        Text(
+                            text = userdata.email,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 18.sp, fontStyle = FontStyle.Italic
+                        )
+
+                        Row() {
+                            Text(
+                                text = userdata.designation,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp, modifier = Modifier.weight(0.6F))
+
+                            Text(
+                                text = userdata.accountStatus.toString(),
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Green,
+                                fontSize = 15.sp, modifier = Modifier.weight(0.4F), textAlign = TextAlign.End
+                            )
+
+                        }
+
+                    }
+
+                }
+
+                Icon(imageVector = if(expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = "Down Arrow",
                     modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
                         .size(25.dp)
                         .clickable {
 
                             expanded = !expanded
-                        },
-                    tint = Color.DarkGray
+                        }, tint = Color.DarkGray
                 )
 
-                AnimatedVisibility(visible = expanded) {
-                    Column {
-                        Text(text = "djhddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-
-                        Divider(modifier = Modifier.padding(3.dp))
-
-                        Text(text = userdata.name)
-                    }
-                }
             }
 
-            IconButton(onClick = {
 
-            }, modifier = Modifier
-                .align(Alignment.CenterEnd)) {
-                Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion")
+
             }
+
+
         }
-    }
+
+
 
 
 }
 
 @Composable
-fun getUsers() {
+fun GetUsers(viewModel: LoginViewModel) {
 
-    val deletedItem = remember { mutableStateListOf<userData>() }
+    val deletedItem = remember { mutableStateListOf<UserData>() }
 
+    val Context = LocalContext.current
 
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -143,34 +173,105 @@ fun getUsers() {
                 }
             })
 
-        LazyColumn {
 
-            itemsIndexed(
-                items = getUsersList(),
-                itemContent = { index, item ->
+        val roleOption = listOf("ADMIN","SUBADMIN","OPERATOR")
+        var expanded by remember { mutableStateOf(false) }
+        var selectRole by remember { mutableStateOf("") }
+        var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
-                    AnimatedVisibility(
-                        visible = !deletedItem.contains(item),
-                        enter = expandVertically(),
-                        exit = shrinkVertically(animationSpec = tween(1000))
-                    ) {
-                        ProjectItems(item, { passinguserdata ->
-                            deletedItem.add(passinguserdata)
-                        }, {
+        val icon =if (expanded){
+            Icons.Filled.KeyboardArrowUp
+        }else{
+            Icons.Filled.KeyboardArrowDown
+        }
 
-                        })
+        Column {
+
+            OutlinedTextField(
+                value = selectRole, onValueChange = {
+                    selectRole = it
+
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned {
+
+                        // This value is used to assign to
+                        // the DropDown the same width
+
+                        textFieldSize = it.size.toSize()
+                    }
+                    .padding(start = 20.dp, end = 20.dp, top = 15.dp),enabled = false,
+                trailingIcon = {
+                    Icon(icon , contentDescription = null, Modifier.clickable {
+                        expanded=!expanded
+                    })
+                },
+                label = { Text(text = "Select Role") }
+
+            )
+
+            DropdownMenu(expanded = expanded, onDismissRequest = {expanded=false},
+                modifier = Modifier
+                    .width(with(LocalDensity.current){textFieldSize.width.toDp()})
+            )
+            {
+                roleOption.forEach { label ->
+                    DropdownMenuItem(onClick = {
+                        selectRole=label
+                        expanded=false
+                        viewModel.getUsers(selectRole)
+                    }) {
+
+                        Text(text = label)
+                    }
+                }
+            }
+            val getResult = viewModel.getUserResponse.value
+            when(getResult){
+
+                is Resource.Success -> {
+                    getResult.data?.let {
+
+                        Log.e("detail", it.payload.toString())
+                        LazyList(it.payload)
 
                     }
                 }
-            )
+
+                is Resource.Error -> {
+                    Toast.makeText(Context, "${getResult.message}", Toast.LENGTH_SHORT).show()
+                }
+
+                else -> {}
+            }
+
         }
+
 
     }
 
 }
 
+@Composable
+fun LazyList(payload: List<Payload>) {
+    LazyColumn {
+
+        itemsIndexed(
+            items = payload,
+            itemContent = { index, item ->
+
+
+                    ProjectItems(item)
+
+
+            }
+        )
+    }
+}
+
 @Preview
 @Composable
 fun fetDisplay() {
-    getUsers()
+    //GetUsers()
 }

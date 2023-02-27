@@ -24,9 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.officeapp.viewmodels.LoginViewModel
 
 @Composable
-fun AdminData(navController: NavController){
+fun AdminData(navController: NavController,viewModel: LoginViewModel){
 
     // on below line we are creating and initializing our array list
     lateinit var courseList: List<GridModel>
@@ -72,6 +73,9 @@ fun AdminData(navController: NavController){
                                 if (it.itemName == "Add Users") {
                                     navController.navigate(Screen.AddSubAdmin.route)
                                 }
+                                else if(it.itemName == "Users Details"){
+                                    navController.navigate(Screen.UsersDetail.route)
+                                }
                             }
                     ) {
                         Text(text = "Items", textAlign = TextAlign.Center)
@@ -103,5 +107,5 @@ fun getItemData():List<GridModel>{
 @Preview
 @Composable
 fun display(){
-    AdminData(navController = rememberNavController())
+    // AdminData(navController = rememberNavController())
 }

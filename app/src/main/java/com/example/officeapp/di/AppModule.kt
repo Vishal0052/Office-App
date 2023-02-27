@@ -21,7 +21,7 @@ import javax.inject.Singleton
 object AppModule {
 
     @Provides
-    fun provideApiService(): ApiService = Retrofit.Builder().baseUrl("https://office.antino.ca")
+    fun provideApiService(): ApiService = Retrofit.Builder().baseUrl("https://office.antino.ca/")
         .addConverterFactory(GsonConverterFactory.create()).build()
         .create(ApiService::class.java)
 
