@@ -98,9 +98,9 @@ data class GridModel(var itemName:String)
 fun getItemData():List<GridModel>{
 
     return listOf(GridModel("Add Users"),
-            GridModel("Order History"),
-            GridModel("menu"),
             GridModel("Users Details"),
+            GridModel("menu"),
+            GridModel("Order History"),
     )
 }
 

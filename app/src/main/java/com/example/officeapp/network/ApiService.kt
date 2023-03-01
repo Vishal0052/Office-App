@@ -5,12 +5,7 @@ import com.example.officeapp.model.deleteUser.DeleteUserResponse
 import com.example.officeapp.model.deleteUser.DeleteUserData
 import com.example.officeapp.model.userData.UserDataRes
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface ApiService {
 
@@ -23,7 +18,7 @@ interface ApiService {
      @POST("user/createuser")
      suspend fun createUser(@Header("authorization") token:String , @Body createUser : CreateUser ) : Response<CreateUserResponse>
 
-     @DELETE("user/removeuser")
-     suspend fun deleteUser(@Header("authorization") token:String , @Body deleteUserData: DeleteUserData) : Response<DeleteUserResponse>
+     @HTTP(method = "DELETE", path = "user/removeuser", hasBody = true)
+     suspend fun deleteUser(@Header("authorization") token:String , @Body deleteUserData : DeleteUserData ) : Response<DeleteUserResponse>
 
 }

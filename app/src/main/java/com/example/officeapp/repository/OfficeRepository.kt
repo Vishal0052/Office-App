@@ -65,7 +65,7 @@ class OfficeRepository @Inject constructor(private val apiService: ApiService) {
     suspend fun deleteUser(token: String ,deleteUserData : DeleteUserData) : Resource<DeleteUserResponse>{
         return try {
             val deleteUserResponse = apiService.deleteUser(token , deleteUserData)
-
+            Log.e("errorBody","${deleteUserResponse.errorBody()?.string()}")
             if(deleteUserResponse.isSuccessful){
                 Resource.Success(deleteUserResponse.body())
             } else{

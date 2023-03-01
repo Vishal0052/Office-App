@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.officeapp.data.Admin.Screens.DeleteMenuItem
+import com.example.officeapp.data.Admin.Screens.DeleteMenuUi
 import com.example.officeapp.ui.theme.OfficeAppTheme
 import com.example.officeapp.viewmodels.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,6 +33,9 @@ class MainActivity : ComponentActivity()
 
                 navController= rememberNavController()
                SetUpNavGraph(navController = navController,viewModel)
+
+               // AddMenu()
+
 
 
                // getUsers()

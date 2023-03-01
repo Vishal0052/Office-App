@@ -3,6 +3,9 @@ package com.example.officeapp.utils
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,6 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -26,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import com.example.officeapp.model.UserData
+import com.example.officeapp.model.deleteUser.DeleteUserData
 import com.example.officeapp.model.userData.Payload
 import com.example.officeapp.viewmodels.LoginViewModel
 
@@ -34,9 +38,11 @@ import com.example.officeapp.viewmodels.LoginViewModel
 
 @Composable
 fun ProjectItems(
-    userdata : Payload,
-
-    ) {
+    userdata: Payload,
+    viewModel: LoginViewModel,
+    selectRole: String,
+    deleteUser: SnapshotStateList<Payload>
+) {
 
 
     var expanded by remember{ mutableStateOf(false) }
@@ -66,9 +72,11 @@ fun ProjectItems(
                 )
 
                 Text(
-                    text = userdata.designation,
+                    text = userdata.role,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,modifier = Modifier.weight(0.4F)
+                    fontSize = 18.sp,modifier = Modifier
+                        .weight(0.4F)
+                        .padding(end = 2.dp), textAlign = TextAlign.End
                 )
 
 
@@ -79,7 +87,7 @@ fun ProjectItems(
                   , verticalAlignment = Alignment.CenterVertically ){
 
                 Text(
-                    text = "Available",
+                    text = if(userdata.isAvailable) "Available" else "Not Available",
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Bold,
                     color = Color.Green,
@@ -87,6 +95,14 @@ fun ProjectItems(
                 )
 
                 IconButton(onClick = {
+
+
+                    viewModel.deleteUser(DeleteUserData(userdata.email))
+
+                    if(Constants.deletePostStatus){
+                        deleteUser.add(userdata)
+                    }
+
 
                 }) {
                     Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion",
@@ -119,11 +135,11 @@ fun ProjectItems(
                                 fontSize = 18.sp, modifier = Modifier.weight(0.6F))
 
                             Text(
-                                text = userdata.accountStatus.toString(),
+                                text = if(userdata.accountStatus) "Active" else " Deactive",
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Green,
-                                fontSize = 15.sp, modifier = Modifier.weight(0.4F), textAlign = TextAlign.End
+                                fontSize = 15.sp, modifier = Modifier.weight(0.4F), textAlign = TextAlign.Center
                             )
 
                         }
@@ -158,8 +174,6 @@ fun ProjectItems(
 
 @Composable
 fun GetUsers(viewModel: LoginViewModel) {
-
-    val deletedItem = remember { mutableStateListOf<UserData>() }
 
     val Context = LocalContext.current
 
@@ -220,6 +234,7 @@ fun GetUsers(viewModel: LoginViewModel) {
                     DropdownMenuItem(onClick = {
                         selectRole=label
                         expanded=false
+
                         viewModel.getUsers(selectRole)
                     }) {
 
@@ -234,7 +249,10 @@ fun GetUsers(viewModel: LoginViewModel) {
                     getResult.data?.let {
 
                         Log.e("detail", it.payload.toString())
-                        LazyList(it.payload)
+//                        val sendRole :(String)->Unit = {
+//
+//                        }
+                        LazyList(it.payload,viewModel,selectRole)
 
                     }
                 }
@@ -254,19 +272,35 @@ fun GetUsers(viewModel: LoginViewModel) {
 }
 
 @Composable
-fun LazyList(payload: List<Payload>) {
+fun LazyList(payload: List<Payload>, viewModel: LoginViewModel, selectRole: String) {
+
+    val deleteUser = remember { mutableStateListOf<Payload>() }
+
     LazyColumn {
+
+//        itemsIndexed(
+//            items = payload,
+//            itemContent = { index, item ->
+//
+//                    ProjectItems(item,viewModel,selectRole)
+//
+//
+//            }
+//        )
 
         itemsIndexed(
             items = payload,
-            itemContent = { index, item ->
-
-
-                    ProjectItems(item)
-
-
+            itemContent = {index,item->
+                AnimatedVisibility(visible = !deleteUser.contains(item),
+                    enter = expandVertically(),
+                    exit = shrinkVertically(animationSpec = tween(1000))
+                ) {
+                    ProjectItems(userdata = item, viewModel = viewModel, selectRole = selectRole ,deleteUser)
+                }
             }
         )
+
+
     }
 }
 

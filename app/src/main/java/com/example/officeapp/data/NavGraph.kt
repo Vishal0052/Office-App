@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.officeapp.ui.theme.RegisterSubAdmin
 import com.example.officeapp.utils.Constants
+import com.example.officeapp.utils.Constants.deletePostStatus
 import com.example.officeapp.utils.GetUsers
 import com.example.officeapp.utils.Resource
 import com.example.officeapp.viewmodels.LoginViewModel
@@ -24,6 +25,7 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
                 viewModel.saveValueInPref(Constants.AUTH_TOKEN,it.accesstoken)
                 viewModel.saveUserDetails()
             }
+            Log.e("login","Result")
             if (result.data?.payload?.userInfo?.role == "ADMIN") {
                 navController.navigate(Screen.Admin.route)
             }
@@ -41,6 +43,7 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
         is Resource.Success ->{
             Toast.makeText(mContext,createResult.data?.message,Toast.LENGTH_LONG).show()
             navController.navigate(Screen.Admin.route)
+
         }
 
         is Resource.Error -> {
@@ -53,7 +56,23 @@ fun SetUpNavGraph(navController: NavHostController, viewModel: LoginViewModel){
         else -> {}
     }
 
+    val deleterResult = viewModel.deleteUserResponse.value
 
+    when(deleterResult){
+
+        is Resource.Success -> {
+            Toast.makeText(mContext, deleterResult.data?.message, Toast.LENGTH_SHORT).show()
+            deletePostStatus=true
+        }
+
+        is Resource.Error -> {
+            Toast.makeText(mContext, "${deleterResult.message}", Toast.LENGTH_SHORT).show()
+            deletePostStatus=false
+
+        }
+
+        else -> {}
+    }
 
 
 

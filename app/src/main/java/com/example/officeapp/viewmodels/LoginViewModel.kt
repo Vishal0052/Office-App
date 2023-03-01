@@ -2,6 +2,7 @@ package com.example.officeapp.viewmodels
 
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
@@ -28,11 +29,14 @@ class LoginViewModel @Inject constructor(
     private val officeRepository: OfficeRepository,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
+
     val loginResponse: MutableState<Resource<LoginResponse>?> = mutableStateOf(null)
     val createUserResponse: MutableState<Resource<CreateUserResponse>?> = mutableStateOf(null)
 
     val getUserResponse: MutableState<Resource<UserDataRes>?> = mutableStateOf(null)
     val deleteUserResponse: MutableState<Resource<DeleteUserResponse>?> = mutableStateOf(null)
+
+
 
 
     var email = ""
@@ -43,6 +47,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             loginResponse.value = Resource.loading()
             loginResponse.value = officeRepository.loginUser(loginDataModel)
+            Log.e("check",loginResponse.toString())
         }
     }
 
@@ -68,9 +73,7 @@ class LoginViewModel @Inject constructor(
             deleteUserResponse.value =Resource.loading()
             deleteUserResponse.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
                 ?.let {authToken ->
-                officeRepository.deleteUser(authToken,deleteUserData)
-
-            }
+                officeRepository.deleteUser(authToken,deleteUserData)            }
         }
     }
 

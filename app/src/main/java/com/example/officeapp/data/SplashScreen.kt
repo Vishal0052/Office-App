@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.officeapp.model.LoginDataModel
 import com.example.officeapp.utils.Constants
 import com.example.officeapp.viewmodels.LoginViewModel
@@ -27,8 +28,11 @@ fun splash(navController: NavController,viewModel:LoginViewModel) {
 
     if(email!=null && password!=null){
 
-        viewModel.loginUser(LoginDataModel(email,password))
 
+
+        LaunchedEffect(key1 = true){
+            viewModel.loginUser(LoginDataModel(email,password))
+        }
 
     }
     else{
