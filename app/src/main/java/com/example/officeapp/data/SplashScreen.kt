@@ -28,8 +28,6 @@ fun splash(navController: NavController,viewModel:LoginViewModel) {
 
     if(email!=null && password!=null){
 
-
-
         LaunchedEffect(key1 = true){
             viewModel.loginUser(LoginDataModel(email,password))
         }

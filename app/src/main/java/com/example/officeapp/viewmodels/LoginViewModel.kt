@@ -8,12 +8,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.officeapp.model.CreateUser
-import com.example.officeapp.model.CreateUserResponse
-import com.example.officeapp.model.LoginDataModel
-import com.example.officeapp.model.LoginResponse
+import com.example.officeapp.model.*
+import com.example.officeapp.model.createOrder.CreateOrderData
+import com.example.officeapp.model.createOrder.CreateOrderDataResponse
 import com.example.officeapp.model.deleteUser.DeleteUserData
 import com.example.officeapp.model.deleteUser.DeleteUserResponse
+import com.example.officeapp.model.resetPassword.ResetPasswordData
+import com.example.officeapp.model.resetPassword.ResetPasswordResponse
 import com.example.officeapp.model.userData.UserDataRes
 import com.example.officeapp.repository.OfficeRepository
 import com.example.officeapp.utils.Constants
@@ -27,7 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val officeRepository: OfficeRepository,
-    private val sharedPreferences: SharedPreferences
+     val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     val loginResponse: MutableState<Resource<LoginResponse>?> = mutableStateOf(null)
@@ -36,8 +37,10 @@ class LoginViewModel @Inject constructor(
     val getUserResponse: MutableState<Resource<UserDataRes>?> = mutableStateOf(null)
     val deleteUserResponse: MutableState<Resource<DeleteUserResponse>?> = mutableStateOf(null)
 
+    val getMenuItemsResponse: MutableState<Resource<GetMenuResponse>?> = mutableStateOf(null)
 
-
+    val createOrderResponse: MutableState<Resource<CreateOrderDataResponse>?> = mutableStateOf(null)
+    val resetResponse: MutableState<Resource<ResetPasswordResponse>?> = mutableStateOf(null)
 
     var email = ""
     var password = ""
@@ -64,8 +67,10 @@ class LoginViewModel @Inject constructor(
             getUserResponse.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
                 ?.let { authToken ->
                     officeRepository.getUser(authToken,role)
+
                 }
         }
+
     }
 
     fun deleteUser(deleteUserData: DeleteUserData){
@@ -77,7 +82,35 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun getMenuItems() {
+        viewModelScope.launch {
+            getMenuItemsResponse.value = Resource.loading()
+            getMenuItemsResponse.value = sharedPreferences.getString(Constants.AUTH_TOKEN, null)
+                ?.let { authToken ->
+                    officeRepository.getMenuItems(authToken)
+                }
+        }
+    }
 
+    fun createOrder(createOrderData: CreateOrderData) {
+        viewModelScope.launch {
+            createOrderResponse.value = Resource.loading()
+            createOrderResponse.value =  sharedPreferences.getString(Constants.AUTH_TOKEN, null)
+                ?.let { authToken ->
+                    officeRepository.createOrders(authToken, createOrderData)
+                }
+        }
+    }
+
+    fun resetPass(resetPasswordData: ResetPasswordData) {
+        viewModelScope.launch {
+            resetResponse.value = Resource.loading()
+            resetResponse.value =  sharedPreferences.getString(Constants.AUTH_TOKEN, null)
+                ?.let { authToken ->
+                    officeRepository.resetPassword(authToken, resetPasswordData)
+                }
+        }
+    }
 
     fun saveValueInPref(key: String, value: String) {
         sharedPreferences.edit().putString(key, value).commit()

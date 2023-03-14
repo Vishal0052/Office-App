@@ -1,5 +1,6 @@
 package com.example.officeapp
 
+import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -19,18 +20,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.officeapp.data.Admin.Screens.LoadingBar
+import com.example.officeapp.model.resetPassword.ResetPasswordData
+import com.example.officeapp.utils.Resource
 import com.example.officeapp.utils.Utils
 import com.example.officeapp.utils.showError
+import com.example.officeapp.viewmodels.LoginViewModel
 
-@Preview
 @Composable
-fun OneTimeRequest(){
+fun OneTimeRequest(navController: NavHostController, viewModel: LoginViewModel) {
 
+    var isLoading by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.Center
     , horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -46,6 +51,7 @@ fun OneTimeRequest(){
             mutableStateOf(false)
 
         }
+
         var isErrornewpassword by remember { mutableStateOf(false) }
         val context = LocalContext.current
 
@@ -87,7 +93,6 @@ fun OneTimeRequest(){
             label = { Text(text = "Enter Password") }, modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp),
-            visualTransformation = PasswordVisualTransformation(),
             isError = isErrorpassword,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 
@@ -108,8 +113,7 @@ fun OneTimeRequest(){
             label = { Text(text = "Enter New Password") }, modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp),
-            visualTransformation = PasswordVisualTransformation(),
-isError = isErrornewpassword,
+               isError = isErrornewpassword,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 
         )
@@ -123,7 +127,8 @@ isError = isErrornewpassword,
             {
 
                 if (Utils.checkEmail(email, context) && Utils.checkPassword(password, context)) {
-                    Toast.makeText(context, "Login Sucess", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(context, "Login Sucess", Toast.LENGTH_SHORT).show()
+                    viewModel.resetPass(ResetPasswordData(email,password,newPassword))
                 }
 
 
@@ -136,12 +141,38 @@ isError = isErrornewpassword,
             Text(text = "Login", textAlign = TextAlign.Center)
         }
 
+    }
+    var context = LocalContext.current
+    if(isLoading) LoadingBar()
+    val oneTimeRequestResult = viewModel.resetResponse.value
+
+    LaunchedEffect(key1 = oneTimeRequestResult) {
+
+        when (oneTimeRequestResult) {
+            is Resource.Success -> {
+                isLoading=false
+                oneTimeRequestResult.data?.let {
+                    Toast.makeText(context, "Password Reset Succesfully", Toast.LENGTH_SHORT).show()
+                    navController.navigate(Screen.login.route)
 
 
+                }
+            }
+            is Resource.loading -> {
+
+                isLoading=true
+
+            }
+            is Resource.Error -> {
+                Toast.makeText(context, "failed${oneTimeRequestResult.message}", Toast.LENGTH_SHORT).show()
+                isLoading=false
+            }
+            else -> {}
+        }
     }
 }
 @Preview
 @Composable
 fun show(){
-    OneTimeRequest()
+//    OneTimeRequest(navController)
 }

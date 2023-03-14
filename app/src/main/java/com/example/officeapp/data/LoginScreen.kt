@@ -1,16 +1,13 @@
-package com.example.officeapp
+package com.example.officeapp.data
 
 import android.content.Context
-import android.graphics.drawable.Icon
 import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -28,24 +25,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.example.officeapp.Screen
 import com.example.officeapp.model.LoginDataModel
-import com.example.officeapp.model.LoginResponse
-import com.example.officeapp.network.ApiService
-import com.example.officeapp.repository.OfficeRepository
+import com.example.officeapp.utils.Constants
 import com.example.officeapp.utils.Resource
 import com.example.officeapp.utils.Utils.checkEmail
 import com.example.officeapp.utils.Utils.checkPassword
 import com.example.officeapp.utils.showError
 import com.example.officeapp.viewmodels.LoginViewModel
-import com.google.gson.Gson
-
 
 @Composable
-fun login(loginViewModel: LoginViewModel ) {
-    Log.v("Com","Inflate..")
+fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
+
+    val mContext = LocalContext.current
+
     val Teal200 = "#20d9f8"
     var isErroremail by remember {
         mutableStateOf(false)
@@ -54,8 +48,12 @@ fun login(loginViewModel: LoginViewModel ) {
         mutableStateOf(false)
     }
 
+//    LaunchedEffect(key1 = false) {
+//        setLoginResponse(mContext, loginViewModel, navController)
+//    }
 
-    val context = LocalContext.current
+  //  setLoginResponse(mContext,loginViewModel, navController)
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -99,8 +97,6 @@ fun login(loginViewModel: LoginViewModel ) {
             showError(errorText = "Entered Email is Not Valid", errorcheck = isErroremail)
         }
 
-
-
         OutlinedTextField(
             value = passWord, onValueChange = {
                 passWord = it
@@ -122,14 +118,12 @@ fun login(loginViewModel: LoginViewModel ) {
             showError(errorText = "password Length is Small", errorcheck = isErrorpassword)
         }
 
-
-
         Button(onClick = {
-                if (checkEmail(email, context) && checkPassword(passWord, context)) {
+                if (checkEmail(email, mContext) && checkPassword(passWord, mContext)) {
+
                     loginViewModel.loginUser(LoginDataModel(email,passWord))
+
                 }
-
-
             }, modifier = Modifier
             .fillMaxWidth()
             .padding(start = 50.dp, end = 50.dp, top = 15.dp),
@@ -138,18 +132,9 @@ fun login(loginViewModel: LoginViewModel ) {
 
             Text(text = "Login", textAlign = TextAlign.Center)
         }
-
-
-
     }
 
 
-}
-
-@Preview
-@Composable
-fun Display() {
-  //login(navController = rememberNavController() ,  loginViewModel = LoginViewModel())
 
 }
 

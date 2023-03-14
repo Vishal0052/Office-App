@@ -35,7 +35,6 @@ import com.example.officeapp.model.userData.Payload
 import com.example.officeapp.viewmodels.LoginViewModel
 
 
-
 @Composable
 fun ProjectItems(
     userdata: Payload,
@@ -43,15 +42,15 @@ fun ProjectItems(
     selectRole: String,
     deleteUser: SnapshotStateList<Payload>
 ) {
+    var expanded by remember { mutableStateOf(false) }
 
-
-    var expanded by remember{ mutableStateOf(false) }
-    
-    Card( modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 20.dp, vertical = 10.dp),
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         shape = RoundedCornerShape(8.dp),
-        elevation = 3.dp) {
+        elevation = 3.dp
+    ) {
         Column(
             modifier = Modifier
                 .padding(10.dp)
@@ -61,8 +60,6 @@ fun ProjectItems(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
-
 
                 Text(
                     text = userdata.name,
@@ -74,51 +71,46 @@ fun ProjectItems(
                 Text(
                     text = userdata.role,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 18.sp,modifier = Modifier
+                    fontSize = 18.sp, modifier = Modifier
                         .weight(0.4F)
                         .padding(end = 2.dp), textAlign = TextAlign.End
                 )
-
-
-
             }
 
-            Row(horizontalArrangement = Arrangement.Center
-                  , verticalAlignment = Alignment.CenterVertically ){
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
                 Text(
-                    text = if(userdata.isAvailable) "Available" else "Not Available",
+                    text = if (userdata.isAvailable) "Available" else "Not Available",
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Bold,
                     color = Color.Green,
-                    fontSize = 20.sp ,modifier = Modifier.weight(0.6F), textAlign = TextAlign.Start
+                    fontSize = 20.sp, modifier = Modifier.weight(0.6F), textAlign = TextAlign.Start
                 )
 
                 IconButton(onClick = {
 
+//                    viewModel.deleteUser(DeleteUserData(userdata.email))
+                    viewModel.deleteUser(DeleteUserData("ali@gmail.com"))
 
-                    viewModel.deleteUser(DeleteUserData(userdata.email))
-
-                    if(Constants.deletePostStatus){
-                        deleteUser.add(userdata)
-                    }
-
-
+                    // if(Constants.deletePostStatus){
+//                    deleteUser.add(userdata)
+                    //  }
                 }) {
-                    Icon(imageVector = Icons.Filled.Delete, contentDescription = "Deletion",
+                    Icon(
+                        imageVector = Icons.Filled.Delete, contentDescription = "Deletion",
                         modifier = Modifier
                             .size(20.dp)
-                            .weight(0.4F)            )
+                            .weight(0.4F)
+                    )
                 }
-
-
             }
 
 
             Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                 AnimatedVisibility(visible = expanded) {
-
-
                     Column {
 
                         Text(
@@ -132,44 +124,37 @@ fun ProjectItems(
                                 text = userdata.designation,
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Light,
-                                fontSize = 18.sp, modifier = Modifier.weight(0.6F))
+                                fontSize = 18.sp, modifier = Modifier.weight(0.6F)
+                            )
 
                             Text(
-                                text = if(userdata.accountStatus) "Active" else " Deactive",
+                                text = if (userdata.accountStatus) "Active" else " Deactive",
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Green,
-                                fontSize = 15.sp, modifier = Modifier.weight(0.4F), textAlign = TextAlign.Center
+                                fontSize = 15.sp,
+                                modifier = Modifier.weight(0.4F),
+                                textAlign = TextAlign.Center
                             )
-
                         }
-
                     }
-
                 }
 
-                Icon(imageVector = if(expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, contentDescription = "Down Arrow",
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "Down Arrow",
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .size(25.dp)
                         .clickable {
 
                             expanded = !expanded
-                        }, tint = Color.DarkGray
+                        },
+                    tint = Color.DarkGray
                 )
-
             }
-
-
-
-            }
-
-
         }
-
-
-
-
+    }
 }
 
 @Composable
@@ -188,14 +173,14 @@ fun GetUsers(viewModel: LoginViewModel) {
             })
 
 
-        val roleOption = listOf("ADMIN","SUBADMIN","OPERATOR")
+        val roleOption = listOf("ADMIN", "SUBADMIN", "OPERATOR")
         var expanded by remember { mutableStateOf(false) }
         var selectRole by remember { mutableStateOf("") }
         var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
-        val icon =if (expanded){
+        val icon = if (expanded) {
             Icons.Filled.KeyboardArrowUp
-        }else{
+        } else {
             Icons.Filled.KeyboardArrowDown
         }
 
@@ -215,25 +200,26 @@ fun GetUsers(viewModel: LoginViewModel) {
 
                         textFieldSize = it.size.toSize()
                     }
-                    .padding(start = 20.dp, end = 20.dp, top = 15.dp),enabled = false,
+                    .padding(start = 20.dp, end = 20.dp, top = 15.dp), enabled = false,
                 trailingIcon = {
-                    Icon(icon , contentDescription = null, Modifier.clickable {
-                        expanded=!expanded
+                    Icon(icon, contentDescription = null, Modifier.clickable {
+                        expanded = !expanded
                     })
                 },
                 label = { Text(text = "Select Role") }
 
             )
 
-            DropdownMenu(expanded = expanded, onDismissRequest = {expanded=false},
+            DropdownMenu(
+                expanded = expanded, onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .width(with(LocalDensity.current){textFieldSize.width.toDp()})
+                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
             )
             {
                 roleOption.forEach { label ->
                     DropdownMenuItem(onClick = {
-                        selectRole=label
-                        expanded=false
+                        selectRole = label
+                        expanded = false
 
                         viewModel.getUsers(selectRole)
                     }) {
@@ -243,7 +229,7 @@ fun GetUsers(viewModel: LoginViewModel) {
                 }
             }
             val getResult = viewModel.getUserResponse.value
-            when(getResult){
+            when (getResult) {
 
                 is Resource.Success -> {
                     getResult.data?.let {
@@ -252,7 +238,7 @@ fun GetUsers(viewModel: LoginViewModel) {
 //                        val sendRole :(String)->Unit = {
 //
 //                        }
-                        LazyList(it.payload,viewModel,selectRole)
+                        LazyList(it.payload, viewModel, selectRole)
 
                     }
                 }
@@ -290,12 +276,18 @@ fun LazyList(payload: List<Payload>, viewModel: LoginViewModel, selectRole: Stri
 
         itemsIndexed(
             items = payload,
-            itemContent = {index,item->
-                AnimatedVisibility(visible = !deleteUser.contains(item),
+            itemContent = { index, item ->
+                AnimatedVisibility(
+                    visible = !deleteUser.contains(item),
                     enter = expandVertically(),
                     exit = shrinkVertically(animationSpec = tween(1000))
                 ) {
-                    ProjectItems(userdata = item, viewModel = viewModel, selectRole = selectRole ,deleteUser)
+                    ProjectItems(
+                        userdata = item,
+                        viewModel = viewModel,
+                        selectRole = selectRole,
+                        deleteUser
+                    )
                 }
             }
         )
