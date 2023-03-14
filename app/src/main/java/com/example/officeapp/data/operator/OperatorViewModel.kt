@@ -1,0 +1,36 @@
+package com.example.officeapp.data.operator
+
+import android.content.SharedPreferences
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.officeapp.model.GetAllOrderResponse
+import com.example.officeapp.model.LoginResponse
+import com.example.officeapp.repository.OfficeRepository
+import com.example.officeapp.utils.Constants
+import com.example.officeapp.utils.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class OperatorViewModel @Inject constructor(
+    private val officeRepository: OfficeRepository,
+    val sharedPreferences: SharedPreferences
+   ) : ViewModel()
+   {
+       val operatorAllOrderRes : MutableState<Resource<GetAllOrderResponse>?> = mutableStateOf(null)
+
+       fun getAllOrder(status : String ){
+           viewModelScope.launch {
+               operatorAllOrderRes.value = Resource.loading()
+               operatorAllOrderRes.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
+                   ?.let { authToken ->
+                       officeRepository.getAllOrder(authToken,status)
+                   }
+           }
+
+       }
+
+   }
