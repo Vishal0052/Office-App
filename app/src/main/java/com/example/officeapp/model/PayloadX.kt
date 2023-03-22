@@ -5,7 +5,7 @@ data class PayloadX(
     val _id: String,
     val createdAt: String,
     val img: String,
-    val imgfileName: String,
-    val itemName: String,
+    val imgfileName: String?,
+    val itemName: String?,
     val updatedAt: String
 )

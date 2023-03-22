@@ -30,7 +30,7 @@ import com.example.officeapp.utils.Constants
 @Composable
 fun CommonOrderScreen(item: PayloadX, onMenuClick: (Item) -> Unit = {}, index: Int) {
 
-    var isVisible by remember { mutableStateOf(false) }
+    var isVisible by rememberSaveable { mutableStateOf(false) }
 
     var counter by rememberSaveable { mutableStateOf(0) }
 
@@ -79,13 +79,15 @@ fun CommonOrderScreen(item: PayloadX, onMenuClick: (Item) -> Unit = {}, index: I
                     .weight(0.5F), horizontalAlignment = Alignment.Start
             )
             {
-                Text(
-                    text = item.itemName,
-                    fontStyle = FontStyle.Normal, textAlign = TextAlign.Start,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 20.sp, modifier = Modifier
-                        .padding(end = 5.dp, bottom = 5.dp, start = 3.dp)
-                )
+                item.itemName?.let {
+                    Text(
+                        text = it,
+                        fontStyle = FontStyle.Normal, textAlign = TextAlign.Start,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 20.sp, modifier = Modifier
+                            .padding(end = 5.dp, bottom = 5.dp, start = 3.dp)
+                    )
+                }
 
                 Card(shape = RoundedCornerShape(5.dp),
                     border = BorderStroke(1.dp, color = Color(Constants.Grey200)),
@@ -106,7 +108,7 @@ fun CommonOrderScreen(item: PayloadX, onMenuClick: (Item) -> Unit = {}, index: I
 
                                     isVisible = true
                                     counter++
-                                    quantity=counter
+                                    quantity = counter
                                 },
                             text = "ADD",
                             fontWeight = FontWeight.Bold,
@@ -125,18 +127,18 @@ fun CommonOrderScreen(item: PayloadX, onMenuClick: (Item) -> Unit = {}, index: I
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 onClick =
                                 {
-                                    if (counter > 1)
-                                    {
+                                    if (counter > 1) {
                                         counter--
                                         quantity = counter
-                                        onMenuClick.invoke(Item(item.itemName, quantity))
+                                        item.itemName?.let { Item(it, quantity) }
+                                            ?.let { onMenuClick.invoke(it) }
 
-                                    } else
-                                    {
+                                    } else {
                                         isVisible = false
-                                        counter=0
+                                        counter = 0
                                         quantity = counter
-                                        onMenuClick.invoke(Item(item.itemName, quantity))
+                                        item.itemName?.let { Item(it, quantity) }
+                                            ?.let { onMenuClick.invoke(it) }
                                     }
                                 }, modifier = Modifier.padding(5.dp)
                             )
@@ -159,7 +161,8 @@ fun CommonOrderScreen(item: PayloadX, onMenuClick: (Item) -> Unit = {}, index: I
                                     try {
                                         counter++
                                         quantity = counter
-                                        onMenuClick.invoke(Item(item.itemName, quantity))
+                                        item.itemName?.let { Item(it, quantity) }
+                                            ?.let { onMenuClick.invoke(it) }
 
                                     } catch (e: Exception) {
                                         Log.e("decrementi", e.toString())

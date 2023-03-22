@@ -30,6 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.navigation.NavController
+import com.example.officeapp.Screen
 import com.example.officeapp.model.deleteUser.DeleteUserData
 import com.example.officeapp.model.userData.Payload
 import com.example.officeapp.viewmodels.LoginViewModel
@@ -43,6 +45,7 @@ fun ProjectItems(
     deleteUser: SnapshotStateList<Payload>
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var callDeleteUserRes by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -93,7 +96,8 @@ fun ProjectItems(
                 IconButton(onClick = {
 
 //                    viewModel.deleteUser(DeleteUserData(userdata.email))
-                    viewModel.deleteUser(DeleteUserData("ali@gmail.com"))
+                    viewModel.deleteUser(DeleteUserData(userdata.email))
+                    callDeleteUserRes=true
 
                     // if(Constants.deletePostStatus){
 //                    deleteUser.add(userdata)
@@ -155,22 +159,69 @@ fun ProjectItems(
             }
         }
     }
+
+    if (callDeleteUserRes) {
+        DeleteUserBtnResponse(loginViewModel = viewModel) {
+            if (it) {
+                deleteUser.add(userdata)
+            }
+        }
+    }
 }
 
 @Composable
-fun GetUsers(viewModel: LoginViewModel) {
+fun DeleteUserBtnResponse(loginViewModel: LoginViewModel, checkSuccessStatus : (Boolean) -> Unit = {}) {
+
+    var Gcontext = LocalContext.current
+    var deleteUserRes = loginViewModel.deleteUserResponse.value
+
+
+    LaunchedEffect(key1 = deleteUserRes) {
+        when (deleteUserRes) {
+            is Resource.Success -> {
+
+                Toast.makeText(Gcontext, "${deleteUserRes.data?.message}", Toast.LENGTH_SHORT)
+                    .show()
+                checkSuccessStatus.invoke(true)
+            }
+            is Resource.loading -> {
+
+//                Box(
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    CircularProgressIndicator()
+//                }
+            }
+
+            is Resource.Error -> {
+                Toast.makeText(Gcontext, "${deleteUserRes.message}", Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {}
+        }
+    }
+
+}
+
+@Composable
+fun GetUsers(viewModel: LoginViewModel,navController: NavController) {
 
     val Context = LocalContext.current
 
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(text = "Users List") },
+        TopAppBar(title = { Text(text = "Users Detail")},
             navigationIcon = {
-                IconButton(onClick = { /*TODO*/ })
-                {
-                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Go Back")
+
+                IconButton(onClick = {
+                    navController.popBackStack()
+                    navController.navigate(Screen.Admin.route)
+
+                }) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Icon")
                 }
-            })
+            }, backgroundColor = Color(0xFFD1D3D5)
+        )
 
 
         val roleOption = listOf("ADMIN", "SUBADMIN", "OPERATOR")
@@ -229,6 +280,7 @@ fun GetUsers(viewModel: LoginViewModel) {
                 }
             }
             val getResult = viewModel.getUserResponse.value
+
             when (getResult) {
 
                 is Resource.Success -> {
@@ -264,16 +316,6 @@ fun LazyList(payload: List<Payload>, viewModel: LoginViewModel, selectRole: Stri
 
     LazyColumn {
 
-//        itemsIndexed(
-//            items = payload,
-//            itemContent = { index, item ->
-//
-//                    ProjectItems(item,viewModel,selectRole)
-//
-//
-//            }
-//        )
-
         itemsIndexed(
             items = payload,
             itemContent = { index, item ->
@@ -286,7 +328,7 @@ fun LazyList(payload: List<Payload>, viewModel: LoginViewModel, selectRole: Stri
                         userdata = item,
                         viewModel = viewModel,
                         selectRole = selectRole,
-                        deleteUser
+                        deleteUser=deleteUser
                     )
                 }
             }

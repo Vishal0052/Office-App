@@ -8,6 +8,7 @@ object Constants {
     const val USER_ID = "userId"
     const val USER_EMAIL = "email"
     const val USER_PASSWORD = "password"
+    const val USER_NAME = "Antino"
     val Grey200 = "#e5e5e5".toColorInt()
     val lightWight = "#f0f0f0".toColorInt()
     var deletePostStatus = false

@@ -25,4 +25,6 @@ sealed class Screen(var route :String) {
 
     object CompletedOrderScreen : Screen("Completed_Order_Screen")
 
+    object ForgetPassword : Screen("Forget_Password")
+
 }

@@ -18,6 +18,7 @@ import com.example.officeapp.data.AddMenu
 import com.example.officeapp.data.Admin.Screens.AdminCreateOrderScreen
 import com.example.officeapp.data.Admin.Screens.AdminOrderHistory
 import com.example.officeapp.data.Admin.Screens.DeleteMenuItem
+import com.example.officeapp.data.ForgetPassword
 import com.example.officeapp.data.LoginScreen
 import com.example.officeapp.data.SubAdmin.SAdminCreateOrder
 import com.example.officeapp.data.SubAdmin.SAdminOrderHistory
@@ -46,6 +47,7 @@ fun SetUpNavGraph(
     when(createResult){
         is Resource.Success ->{
             Toast.makeText(mContext,createResult.data?.message,Toast.LENGTH_LONG).show()
+            navController.popBackStack()
             navController.navigate(Screen.Admin.route)
         }
 
@@ -88,13 +90,19 @@ fun SetUpNavGraph(
             LaunchedEffect(key1 = Unit) {
                 loginResponseResult.data?.payload?.let { // here we check our resut paylod is not null tahn we move forward
                     viewModel.saveValueInPref(Constants.AUTH_TOKEN, it.accesstoken)
+                    it.userInfo?.let { it1 ->
+                        viewModel.saveValueInPref(Constants.USER_NAME,
+                            it1.name)
+                    }
                     try {
                         if(it.userInfo?.accountStatus == true) {
                             viewModel.saveValueInPref(Constants.USER_ID, it.userInfo._id)
                         }
                         if(it.accountStatus == false) {
                             Log.e("reached", "Result")
+                            navController.popBackStack()
                             navController.navigate(Screen.OneTimeRequest.route)
+
                         }
                     }catch (e :Exception){
                         Log.e("err",e.toString())
@@ -103,14 +111,17 @@ fun SetUpNavGraph(
                 }
 
                  if (loginResponseResult.data?.payload?.userInfo?.role == "ADMIN") {
+                     navController.popBackStack()
                     navController.navigate(Screen.Admin.route)
                     Log.e("login:1", "Result")
 
                 }
                 else if(loginResponseResult.data?.payload?.userInfo?.role == "OPERATOR"){
+                     navController.popBackStack()
                     navController.navigate(Screen.operatorDashboardScreen.route)
                 }
                 else if(loginResponseResult.data?.payload?.userInfo?.role == "SUBADMIN"){
+                     navController.popBackStack()
                     navController.navigate(Screen.SubAdmin.route)
                 }
 
@@ -124,14 +135,6 @@ fun SetUpNavGraph(
         }
         is Resource.loading -> {
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
         }
         else ->{
             Log.e("login:4","Result")
@@ -157,21 +160,21 @@ fun SetUpNavGraph(
             RegisterSubAdmin(navController,viewModel)
         }
         composable(route=Screen.UsersDetail.route){
-            GetUsers(viewModel)
+            GetUsers(viewModel,navController)
         }
 
         composable(route = Screen.DeleteMenu.route){
-            DeleteMenuItem(viewModel)
+            DeleteMenuItem(viewModel,navController)
         }
 
         composable(route=Screen.AddMenu.route){
-            AddMenu()
+            AddMenu(viewModel,navController)
         }
         composable(route=Screen.AdminCreateOrder.route){
             AdminCreateOrderScreen(navController,viewModel)
         }
         composable(route=Screen.AdminOrderHistory.route){
-            AdminOrderHistory()
+            AdminOrderHistory(viewModel,navController)
         }
 
         composable(route = Screen.SubAdmin.route){
@@ -183,15 +186,15 @@ fun SetUpNavGraph(
         }
 
         composable(route = Screen.SAdminCreateOrder.route){
-            SAdminCreateOrder()
+            SAdminCreateOrder(navController,viewModel)
         }
 
         composable(route = Screen.SAdminOrderHistory.route){
-            SAdminOrderHistory()
+            SAdminOrderHistory(viewModel,navController)
         }
 
         composable(route = Screen.pendingOrderScreen.route){
-            PendingOrderScreen(operatorViewModel = operatorViewModel)
+            PendingOrderScreen(operatorViewModel = operatorViewModel,navController)
         }
 
         composable(route = Screen.operatorDashboardScreen.route){
@@ -200,6 +203,10 @@ fun SetUpNavGraph(
 
         composable(route = Screen.CompletedOrderScreen.route){
             CompletedOrder(operatorViewModel)
+        }
+
+        composable(route = Screen.ForgetPassword.route){
+            ForgetPassword(loginViewModel = viewModel, navController = navController)
         }
     }
 

@@ -6,7 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.officeapp.model.GetAllOrderResponse
-import com.example.officeapp.model.LoginResponse
+import com.example.officeapp.model.orderStatus.ChangeOrderStatusData
+import com.example.officeapp.model.orderStatus.ChangeOrderStatusResponse
 import com.example.officeapp.repository.OfficeRepository
 import com.example.officeapp.utils.Constants
 import com.example.officeapp.utils.Resource
@@ -20,17 +21,42 @@ class OperatorViewModel @Inject constructor(
     val sharedPreferences: SharedPreferences
    ) : ViewModel()
    {
+       val operatorFilterOrderRes : MutableState<Resource<GetAllOrderResponse>?> = mutableStateOf(null)
        val operatorAllOrderRes : MutableState<Resource<GetAllOrderResponse>?> = mutableStateOf(null)
+       val operatorChangeOrderRes : MutableState<Resource<ChangeOrderStatusResponse>?> = mutableStateOf(null)
 
-       fun getAllOrder(status : String ){
+       fun getFilterOrder(status : String ){
            viewModelScope.launch {
-               operatorAllOrderRes.value = Resource.loading()
-               operatorAllOrderRes.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
+               operatorFilterOrderRes.value = Resource.loading()
+               operatorFilterOrderRes.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
                    ?.let { authToken ->
-                       officeRepository.getAllOrder(authToken,status)
+                       officeRepository.getFilterOrder(authToken,status)
                    }
            }
 
        }
+
+       fun getAllOrder(){
+           viewModelScope.launch {
+               operatorAllOrderRes.value = Resource.loading()
+               operatorAllOrderRes.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
+                   ?.let { authToken ->
+                       officeRepository.getAllOrder(authToken)
+                   }
+           }
+
+       }
+
+       fun changeOrderStatus(changeOrderStatusData: ChangeOrderStatusData){
+           viewModelScope.launch {
+               operatorChangeOrderRes.value = Resource.loading()
+               operatorChangeOrderRes.value = sharedPreferences.getString(Constants.AUTH_TOKEN,null)
+                   ?.let { authToken ->
+                       officeRepository.changeOrdersStatus(authToken ,changeOrderStatusData)
+                   }
+           }
+
+       }
+
 
    }

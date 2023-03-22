@@ -37,9 +37,9 @@ fun CompletedOrder(operatorViewModel: OperatorViewModel){
     var showEmptyTextMsg by remember { mutableStateOf(false)}
 
     LaunchedEffect(key1 = true) {
-        operatorViewModel.getAllOrder("delivered")
+        operatorViewModel.getFilterOrder("delivered")
     }
-    val deliveredOrderList = operatorViewModel.operatorAllOrderRes.value
+    val deliveredOrderList = operatorViewModel.operatorFilterOrderRes.value
     Log.e("empty1",deliveredOrderList.toString())
 
     when(deliveredOrderList){

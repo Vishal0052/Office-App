@@ -1,6 +1,9 @@
 package com.example.officeapp
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -12,6 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.officeapp.data.operator.OperatorViewModel
 import com.example.officeapp.ui.theme.OfficeAppTheme
 import com.example.officeapp.viewmodels.LoginViewModel
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import dagger.hilt.android.AndroidEntryPoint
 
 //import com.example.officeapp.utils.getUsers
@@ -32,8 +37,12 @@ class MainActivity : ComponentActivity()
                 // A surface container using the 'background' color from the theme
 
 
+
                 navController= rememberNavController()
                SetUpNavGraph(navController = navController,viewModel,operatorViewModel)
+
+
+
 
                // SAdminCreateOrder()
 

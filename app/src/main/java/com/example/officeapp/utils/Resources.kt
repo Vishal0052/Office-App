@@ -8,4 +8,6 @@ sealed class Resource<T:Any> {
 
      class Error<T:Any>(val message: String?) :Resource<T>()
 
+    class code<T:Any>(val code : Int?) : Resource<T>()
+
 }

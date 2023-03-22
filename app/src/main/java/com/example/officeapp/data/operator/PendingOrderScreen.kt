@@ -1,42 +1,53 @@
 package com.example.officeapp.data.operator
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
+import androidx.navigation.NavController
 import com.example.officeapp.R
+import com.example.officeapp.Screen
+import com.example.officeapp.data.Admin.Screens.LoadingBar
 import com.example.officeapp.model.PayloadXX
+import com.example.officeapp.model.orderStatus.ChangeOrderStatusData
 import com.example.officeapp.utils.Constants
 import com.example.officeapp.utils.Resource
 
 
-@Composable fun PendingOrderScreen(operatorViewModel: OperatorViewModel){
+@Composable fun PendingOrderScreen(operatorViewModel: OperatorViewModel,navController: NavController){
+
 
     var getOperatorId = operatorViewModel.sharedPreferences.getString(Constants.USER_ID,null)
     var showEmptyText by remember { mutableStateOf(false)}
+    var statusApiRes by remember { mutableStateOf(false) }
+    var checkStatusForNavigate by remember { mutableStateOf("")}
+
 
     LaunchedEffect(key1 = true) {
-        operatorViewModel.getAllOrder("placed")
+        operatorViewModel.getAllOrder()
     }
     val pendingOrderList = operatorViewModel.operatorAllOrderRes.value
 
@@ -46,7 +57,7 @@ import com.example.officeapp.utils.Resource
                 //PendingOrderDisplay(it)
 
                 it.payload.forEachIndexed { index, item ->
-                    if(getOperatorId==item.orderedTo&&item.orderStatus=="placed"){
+                    if(getOperatorId==item.orderedTo&&item.orderStatus!="delivered"){
                           showEmptyText=true
                     }
                 }
@@ -57,7 +68,12 @@ import com.example.officeapp.utils.Resource
                         items = it.payload,
                         itemContent = {index,item->
                             if(getOperatorId==item.orderedTo) {
-                                PendingOrderDisplay(pendingOrder = item)
+                                PendingOrderDisplay(pendingOrder = item,operatorViewModel,
+                                    checkSelectStatus = {
+                                            statusApi , clickedStatus ->
+                                        statusApiRes=statusApi
+                                        checkStatusForNavigate=clickedStatus
+                                    })
                             }
                         }
                     )
@@ -103,21 +119,97 @@ import com.example.officeapp.utils.Resource
                 )
             }
         }
-        else -> {Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = "No Data Received",
-                modifier = Modifier.padding(start = 6.dp, end = 5.dp)
-            )
-        }}
+
+        is Resource.code -> {
+            if(pendingOrderList.code==404){
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center
+                ){
+                    Text(
+                        text = "No Data Received",
+                        modifier = Modifier.padding(start = 6.dp, end = 5.dp),
+                        textAlign = TextAlign.Center,
+                        fontSize = 25.sp
+                    )
+                }
+            }
+        }
+        else -> {
+
+        }
+    }
+
+    if(statusApiRes){
+        CallStatusResFun(operatorViewModel,navController,checkStatusForNavigate){
+            statusApiRes=it
+        }
     }
 
 }
-@Composable fun PendingOrderDisplay(pendingOrder: PayloadXX) {
+
+@Composable
+fun CallStatusResFun(
+    operatorViewModel: OperatorViewModel,
+    navController: NavController,
+    checkStatusForNavigate: String,
+    getstatusApiRes : (Boolean) -> Unit = {}
+) {
+    var oContext= LocalContext.current
+    var changeOrderStatusRes = operatorViewModel.operatorChangeOrderRes.value
+    Log.e("cos",changeOrderStatusRes.toString())
+//    var isLoading by remember { mutableStateOf(false) }
+//    if(isLoading) LoadingBar()
+
+    when (changeOrderStatusRes) {
+        is Resource.Success -> {
+            Log.e("cos2","success")
+            //isLoading=false
+            Toast.makeText(oContext, "${changeOrderStatusRes.data?.message}", Toast.LENGTH_SHORT).show()
+            if(checkStatusForNavigate=="delivered"){
+                navController.popBackStack()
+                navController.navigate(Screen.operatorDashboardScreen.route)
+            }
+            getstatusApiRes.invoke(false)
+        }
+        is Resource.loading -> {
+
+          //  isLoading=true
+
+        }
+        is Resource.Error -> {
+            Log.e("cos3","Error")
+            Toast.makeText(oContext, "${changeOrderStatusRes.message}", Toast.LENGTH_SHORT).show()
+            //isLoading=false
+            getstatusApiRes.invoke(false)
+        }
+        else -> {}
+    }
+//    LaunchedEffect(key1 = changeOrderStatus) {
+//
+//    }
+}
+
+@Composable fun PendingOrderDisplay(pendingOrder: PayloadXX, operatorViewModel: OperatorViewModel,checkSelectStatus: (Boolean,String) -> Unit  ) {
 
      val items = remember { pendingOrder.items.toMutableList() }
     var expandCard by remember { mutableStateOf(false) }
 
-    if(pendingOrder.orderStatus=="placed") {
+    val statusOptions = listOf("awaiting","delivered")
+    var selectStatus by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    var textFieldSize by remember { mutableStateOf(Size.Zero) }
+    val icon = if (expanded) {
+        Icons.Filled.KeyboardArrowUp
+    } else {
+        Icons.Filled.KeyboardArrowDown
+    }
+
+    selectStatus=pendingOrder.orderStatus
+
+    if(pendingOrder.orderStatus!="delivered") {
         Column {
 
             Card(
@@ -349,23 +441,74 @@ import com.example.officeapp.utils.Resource
                 }
             }
 
-            Card(shape = RoundedCornerShape(5.dp),
-                border = BorderStroke(1.dp, color = Color(Constants.Grey200)),
-                modifier = Modifier
-                    .padding(start = 10.dp, end = 10.dp, top = 1.dp, bottom = 1.dp)
-                    .fillMaxWidth()
-                    .clickable {
-                    }) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 25.dp, vertical = 10.dp),
-                    text = "Order Completed",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    color = Color(Constants.Green200),
-                    textAlign = TextAlign.Center
-                )
+//            Card(shape = RoundedCornerShape(5.dp),
+//                border = BorderStroke(1.dp, color = Color(Constants.Grey200)),
+//                modifier = Modifier
+//                    .padding(start = 10.dp, end = 10.dp, top = 1.dp, bottom = 1.dp)
+//                    .fillMaxWidth()
+//                    .clickable {
+//                    }) {
+//                Text(
+//                    modifier = Modifier
+//                        .padding(horizontal = 25.dp, vertical = 10.dp),
+//                    text = "Order Completed",
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 20.sp,
+//                    color = Color(Constants.Green200),
+//                    textAlign = TextAlign.Center
+//                )
+//            }
+
+
+            if(pendingOrder.orderStatus=="placed"){
+                selectStatus="Pending"
+            }else if(pendingOrder.orderStatus=="awaiting"){
+                selectStatus="Picked"
             }
+
+
+            OutlinedTextField(
+                value = "Current Status :- ${selectStatus}", onValueChange = {
+                    selectStatus = it
+
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned {
+                        textFieldSize = it.size.toSize()
+                    }
+                    .padding(start = 10.dp, end = 10.dp, top = 1.dp, bottom = 10.dp), enabled = false,
+                trailingIcon = {
+                    Icon(icon, contentDescription = null, Modifier.clickable {
+                        expanded = !expanded
+                    })
+                },
+                //label = { Text(text = "Select Status") }
+
+            )
+
+            DropdownMenu(
+                expanded = expanded, onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+            )
+            {
+                statusOptions.forEach {
+                    DropdownMenuItem(onClick =
+                    {
+                        selectStatus=it
+                        expanded = false
+                        operatorViewModel.changeOrderStatus(ChangeOrderStatusData(pendingOrder._id,selectStatus))
+                        checkSelectStatus.invoke(true,selectStatus)
+
+                        //viewModel.getUsers(selectRole)
+                    }
+                    ) {
+                        Text(text = it)
+                    }
+                }
+            }
+
 
         }
     }

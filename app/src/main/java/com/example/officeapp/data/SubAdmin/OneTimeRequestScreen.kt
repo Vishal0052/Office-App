@@ -1,6 +1,5 @@
 package com.example.officeapp
 
-import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -115,7 +114,6 @@ fun OneTimeRequest(navController: NavHostController, viewModel: LoginViewModel) 
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp),
                isError = isErrornewpassword,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-
         )
 
         if (isErrornewpassword) {
@@ -153,6 +151,7 @@ fun OneTimeRequest(navController: NavHostController, viewModel: LoginViewModel) 
                 isLoading=false
                 oneTimeRequestResult.data?.let {
                     Toast.makeText(context, "Password Reset Succesfully", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
                     navController.navigate(Screen.login.route)
 
 
@@ -164,7 +163,7 @@ fun OneTimeRequest(navController: NavHostController, viewModel: LoginViewModel) 
 
             }
             is Resource.Error -> {
-                Toast.makeText(context, "failed${oneTimeRequestResult.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "failed ${oneTimeRequestResult.message}", Toast.LENGTH_SHORT).show()
                 isLoading=false
             }
             else -> {}

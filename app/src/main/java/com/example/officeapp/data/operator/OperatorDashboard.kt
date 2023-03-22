@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,6 +21,7 @@ import androidx.core.graphics.toColorInt
 import androidx.navigation.NavHostController
 import com.example.officeapp.R
 import com.example.officeapp.Screen
+import com.example.officeapp.utils.Constants
 
 
 @Composable
@@ -28,35 +30,58 @@ fun OperatorDashboard(navController: NavHostController, operatorViewModel: Opera
     var switchOn by remember { mutableStateOf(false) }
 
     Column {
+
+        val OperatorOpenDialog = remember { mutableStateOf(false) }
+
         TopAppBar(title = { Text(text = "OFFICE APP") },
             actions = {
                 IconButton(onClick = {
+
+                    OperatorOpenDialog.value=true
                     // Toast.makeText(context, "Back Icon Click", Toast.LENGTH_SHORT).show()
-                    operatorViewModel.sharedPreferences.edit().clear().apply()
-                    navController.navigate(Screen.login.route)
+
                 })
                 {
                     Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = "Go Back")
                 }
-            }
+            }, backgroundColor = Color(0xFFD1D3D5)
         )
+
+        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.Start
+            , modifier = Modifier.padding(start = 18.dp,top=30.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(text = "Hii ", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = "${operatorViewModel.sharedPreferences.getString(Constants.USER_NAME,"Antino")}",
+                    fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+                Image(painter = painterResource(id = R.drawable.hand), contentDescription = "hand icon",
+                    modifier = Modifier.height(25.dp).width(25.dp))
+            }
+
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start,modifier = Modifier.padding(top = 6.dp)) {
+                Text(text = "Welcome to ", fontSize = 17.sp, fontWeight = FontWeight.Light)
+                Text(text = "Antino Office App", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+            }
+        }
 
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.align(Alignment.End).padding(end = 14.dp, top = 16.dp)
         ) {
-            Switch(
-                checked = switchOn,
-                onCheckedChange = { switchOn_ ->
-                    switchOn = switchOn_
-                }
-            )
-            Text(
-                text = if (switchOn) "Active" else " In Active",
-                color = if (switchOn) Color.Green else Color.Red
-
-            )
+//            Switch(
+//                checked = switchOn,
+//                onCheckedChange = { switchOn_ ->
+//                    switchOn = switchOn_
+//                }
+//            )
+//            Text(
+//                text = if (switchOn) "Active" else " In Active",
+//                color = if (switchOn) Color.Green else Color.Red
+//
+//            )
         }
 
         Column(
@@ -84,7 +109,7 @@ fun OperatorDashboard(navController: NavHostController, operatorViewModel: Opera
                 ) {
 
                     Image(
-                        painter = painterResource(id = R.drawable.create_order),
+                        painter = painterResource(id = R.drawable.pending),
                         contentDescription = null,
                         modifier = Modifier
                             .width(120.dp)
@@ -117,7 +142,7 @@ fun OperatorDashboard(navController: NavHostController, operatorViewModel: Opera
                 ) {
 
                     Image(
-                        painter = painterResource(id = R.drawable.order_history),
+                        painter = painterResource(id = R.drawable.completed),
                         contentDescription = null,
                         modifier = Modifier
                             .width(120.dp)
@@ -133,5 +158,36 @@ fun OperatorDashboard(navController: NavHostController, operatorViewModel: Opera
             }
 
         }
+
+        if(OperatorOpenDialog.value){
+            AlertDialog(
+                onDismissRequest = { OperatorOpenDialog.value=false },
+                title = { Text(text = "Aleart Dialogue")},
+                text = { Text(text = "Are You Really Want to Logout", color = Color.Black, fontSize = 18.sp)},
+                confirmButton = {
+                    TextButton(onClick = {
+                        operatorViewModel.sharedPreferences.edit().clear().apply()
+                        navController.popBackStack()
+                        navController.navigate(Screen.login.route)
+                        OperatorOpenDialog.value=false
+
+                    }) {
+                        Text(text = "Confirm", color = Color.Black)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        OperatorOpenDialog.value=false
+                    }) {
+                        Text(text = "Dismiss", color = Color.Black)
+                    }
+                },
+                backgroundColor = Color.White,
+                contentColor = Color.White
+            )
+
+        }
     }
+
+
 }

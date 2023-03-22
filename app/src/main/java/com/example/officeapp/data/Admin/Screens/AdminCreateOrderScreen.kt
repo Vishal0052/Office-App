@@ -52,10 +52,8 @@ fun AdminCreateOrderScreen(
         viewModel.getMenuItems()
     }
 
-    //  var listOfOperator = listOf<Payload>()
-
     val getOperator = viewModel.getUserResponse.value
-
+    Log.e("oper",getOperator.toString())
 
     val getMenuItemData = viewModel.getMenuItemsResponse.value
     Log.e("res", getMenuItemData.toString())
@@ -82,49 +80,50 @@ fun AdminCreateOrderScreen(
     }
 
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
+    Surface {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
 
-        CommonTf(
-            text = CavinName, label = "Enter Cavin Name", onTextChange = {
-                CavinName = it
-            }, modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp)
-        )
+            CommonTf(
+                text = CavinName, label = "Enter Cavin Name", onTextChange = {
+                    CavinName = it
+                }, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp)
+            )
 
 
-        OutlinedTextField(value = selectOperator, onValueChange = {
-            selectOperator = it
-
-        },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, top = 10.dp), enabled = false,
-            trailingIcon = {
-
-                Icon(ExpandedIcon, contentDescription = null, Modifier.clickable {
-                    isExpanded = !isExpanded
-                })
+            OutlinedTextField(value = selectOperator, onValueChange = {
+                selectOperator = it
 
             },
-            label = { Text(text = "Select Role") }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, top = 10.dp), enabled = false,
+                trailingIcon = {
 
-        )
+                    Icon(ExpandedIcon, contentDescription = null, Modifier.clickable {
+                        isExpanded = !isExpanded
+                    })
 
-        if (isExpanded) {
+                },
+                label = { Text(text = "Select Operator") }
 
-            when (getOperator) {
+            )
 
-                is Resource.Success -> {
-                    getOperator.data?.let {
+            if (isExpanded) {
+
+                when (getOperator) {
+
+                    is Resource.Success -> {
+                        getOperator.data?.let {
 
 //                            listOfOperator =
 //
 //                            Log.e("checkdata",listOfOperator.toString())
-                        LazyColumn {
+                            LazyColumn {
 //                                items(items = it.payload){
 //                                    OperatorUi(item = it){
 //
@@ -132,163 +131,156 @@ fun AdminCreateOrderScreen(
 //                                        isExpanded=false
 //                                    }
 //                                }
-                            itemsIndexed(items = it.payload, itemContent = { index, item ->
-                                OperatorUi(operator = item) {
-                                    selectOperator = it
-                                    selectOperatorId = it
-                                    isExpanded = false
-                                }
+                                itemsIndexed(items = it.payload, itemContent = { index, item ->
+                                    OperatorUi(operator = item) {
+                                        selectOperator = it
+                                        selectOperatorId = it
+                                        isExpanded = false
+                                    }
 
-                                //Log.e("checkdata",it.payload.toString())
+                                    //Log.e("checkdata",it.payload.toString())
+                                })
+                            }
+
+                            if(it.payload.isNullOrEmpty()){
+                                Text(
+                                    text = "No Operator Available",
+                                    modifier = Modifier.padding(start = 6.dp, end = 5.dp),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 25.sp
+                                )
+                            }
+                        }
+                    }
+                    is Resource.Error -> {
+                        Toast.makeText(Context, "Something went wrong ${getOperator.message}", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {}
+                }
+            }
+
+            when (getMenuItemData) {
+
+                is Resource.Success -> {
+                    getMenuItemData.data?.let {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(bottom = 10.dp)
+                        ) {
+
+                            itemsIndexed(items = it.payload, itemContent = { Index, item ->
+                                CommonOrderScreen(item = item, index = Index, onMenuClick = {
+                                    if (it.qty == 0)
+                                        menuItemsHashMap.remove(Index)
+                                    else
+                                        menuItemsHashMap[Index] = it
+                                })
                             })
+                        }
+
+                        if(it.payload.isEmpty()){
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(),
+                                contentAlignment = Alignment.Center
+                            ){
+                                Text(
+                                    text = "No Data Received",
+                                    modifier = Modifier.padding(start = 6.dp, end = 5.dp),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 25.sp
+                                )
+                            }
+
+
                         }
                     }
                 }
-
+                is Resource.loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
                 is Resource.Error -> {
-                    Toast.makeText(Context, "${getOperator.message}", Toast.LENGTH_SHORT).show()
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "${getMenuItemData.message}",
+                            modifier = Modifier.padding(start = 6.dp, end = 5.dp)
+                        )
+                    }
                 }
 
                 else -> {}
             }
 
+            CommonButton(text = "Order Placed", onClickBtn = {
+                if(CavinName.isBlank()  || selectOperator.isBlank()){
+                    Toast.makeText(Context, "Filled Cant be Blank", Toast.LENGTH_SHORT).show()
+                }
+                else{
 
-        }
+                    menuItemsList.clear()
+                    val size = menuItemsHashMap.size
+                    menuItemsHashMap.forEach { index, item ->
+                        menuItemsList.add(item)
+                        if (size == menuItemsList.size) {
 
+                            scope.launch {
+                                viewModel.createOrder(
+                                    CreateOrderData(
+                                        menuItemsList,
+                                        CavinName,
+                                        selectOperatorId
+                                    )
+                                )
+                            }
 
-        when (getMenuItemData) {
+                            oApiCall = true
 
-            is Resource.Success -> {
-                getMenuItemData.data?.let {
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(bottom = 10.dp)
-                    ) {
-//                            items(items = it.payload){
-//                                CommonOrderScreen(item = it)
-//
-//                            }
-                        itemsIndexed(items = it.payload, itemContent = { Index, item ->
-                            CommonOrderScreen(item = item, index = Index, onMenuClick = {
-                                if (it.qty == 0)
-                                    menuItemsHashMap.remove(Index)
-                                else
-                                    menuItemsHashMap[Index] = it
-                            })
-                        })
+                        }
                     }
                 }
-            }
-            is Resource.loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            is Resource.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "${getMenuItemData.message}",
-                        modifier = Modifier.padding(start = 6.dp, end = 5.dp)
-                    )
-                }
+
+            }, modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 16.dp))
+
+            if (oApiCall) {
+                CreateApiCall(viewModel = viewModel, navController)
             }
 
-            else -> {}
         }
-
-
-        // CommonOrderScreen(it)
-
-
-        CommonButton(onClickBtn = {
-            menuItemsList.clear()
-            val size = menuItemsHashMap.size
-            menuItemsHashMap.forEach { index, item ->
-                menuItemsList.add(item)
-                if (size == menuItemsList.size) {
-
-                    scope.launch {
-                        viewModel.createOrder(
-                            CreateOrderData(
-                                menuItemsList,
-                                CavinName,
-                                selectOperatorId
-                            )
-                        )
-                    }
-
-                    oApiCall = true
-
-                }
-
-            }
-
-        }, modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 16.dp))
-
-        if (oApiCall) {
-            CreateApiCall(viewModel = viewModel, navController, oApiCall)
-        }
-
-//        Button(onClick = {
-////            Log.e("incremente", menuItemsList.forEach {
-////                Log.e("vishal", it.toString())
-////            }.toString())
-//
-//            menuItemsList.clear()
-//             val size = menuItemsHashMap.size
-//            Log.v("Size",size.toString())
-//            menuItemsHashMap.forEach { index, item ->
-//                    menuItemsList.add(item)
-//                if(size == menuItemsList.size)
-//                {
-//
-//                }
-//                Log.v("Sizeh",menuItemsList.size.toString())
-//            }
-//
-//
-//                // if(size == menuItemsList.size)
-//            menuItemsList.forEachIndexed { index, item ->
-//                Log.e("vishal1${index}",menuItemsList.get(index).toString())
-//            }
-//
-//        })
-//        {
-//            Text(text = "click")
-//        }
-
     }
+
 }
 
 @Composable
 fun CreateApiCall(
     viewModel: LoginViewModel,
     navController: NavHostController,
-    oApiCall: Boolean,
 
     ) {
-    var context = LocalContext.current
+    val context = LocalContext.current
 
-    var isLoading by remember {
-        mutableStateOf(false)
-    }
+    var isLoading by remember { mutableStateOf(false) }
 
-    if(isLoading) LoadingBar()
+    if (isLoading) LoadingBar()
     val createOrderResult = viewModel.createOrderResponse.value
 
     LaunchedEffect(key1 = createOrderResult) {
 
         when (createOrderResult) {
             is Resource.Success -> {
-                isLoading=false
+                isLoading = false
                 createOrderResult.data?.let {
                     Toast.makeText(context, "Order Placed Succesfully", Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
                     navController.navigate(Screen.Admin.route)
 
 
@@ -296,12 +288,13 @@ fun CreateApiCall(
             }
             is Resource.loading -> {
 
-                isLoading=true
+                isLoading = true
 
             }
             is Resource.Error -> {
+                navController.popBackStack()
                 navController.navigate(Screen.Admin.route)
-                isLoading=false
+                isLoading = false
             }
             else -> {}
         }

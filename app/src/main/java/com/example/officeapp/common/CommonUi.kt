@@ -3,14 +3,16 @@ package com.example.officeapp.common
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,7 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import com.example.officeapp.model.LoginDataModel
+import com.example.officeapp.utils.Constants
 import com.example.officeapp.utils.Utils
 
 @Composable
@@ -33,13 +37,17 @@ fun CommonTf(
     onTextChange: (String) -> Unit,
 ) {
 
-    OutlinedTextField(
-        value = text,
-        onValueChange = onTextChange,
-        colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent),
-        maxLines = maxLine,
-        label = { Text(text = label) }, modifier = modifier
-    )
+
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = onTextChange,
+            maxLines = maxLine,
+            label = { Text(text = label) },
+            modifier=modifier
+        )
+
+
 
 }
 
@@ -68,6 +76,7 @@ fun RoundIconButton(
 
 @Composable
 fun CommonButton(
+    text: String,
     onClickBtn: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -95,17 +104,67 @@ fun CommonButton(
         modifier = modifier
             .padding(start = 10.dp, end = 10.dp, top = 10.dp)
             .fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
+        colors = ButtonDefaults.buttonColors(backgroundColor = Color("#e46c47".toColorInt()))
 
     ) {
 
         Text(
-            text = "Order Placed",
+            text = text,
             textAlign = TextAlign.Center,
-            color = Color.Green,
+            color = Color.White,
             fontSize = 20.sp
         )
     }
 
 
+}
+
+
+@Composable
+fun AleartDialogBox(){
+    var openDialog = remember { mutableStateOf(true)}
+    if(openDialog.value){
+        AlertDialog(
+            onDismissRequest = { openDialog.value=false },
+            title = { Text(text = "Aleart Dialogue")},
+            text = { Text(text = "Are You Really Want to Logout", color = Color.Black, fontSize = 18.sp)},
+             confirmButton = {
+                 TextButton(onClick = {
+                     openDialog.value=false
+
+                 }) {
+                     Text(text = "Confirm", color = Color.Black)
+                 }
+             },
+            dismissButton = {
+                TextButton(onClick = {
+                    openDialog.value=false
+                }) {
+                    Text(text = "Dismiss", color = Color.Black)
+                }
+            },
+            backgroundColor = Color.White,
+            contentColor = Color.White
+            )
+
+    }
+
+}
+
+
+@Preview
+@Composable
+fun check(){
+    Column(modifier = Modifier.background(Color.White)) {
+        Row {
+            Text(text = "Hi Antino",
+                fontSize = 24.sp, fontWeight = FontWeight.SemiBold, color =( Color.Black))
+            Icon(imageVector = Icons.Filled.Face, contentDescription = "Go Back", modifier = Modifier.align(Alignment.CenterVertically))
+        }
+
+        Row {
+            Text(text = "Welcome to ", fontSize = 17.sp, fontWeight = FontWeight.Light)
+            Text(text = "Antino Office App", fontSize = 18.sp, fontWeight = FontWeight.Medium)
+        }
+    }
 }

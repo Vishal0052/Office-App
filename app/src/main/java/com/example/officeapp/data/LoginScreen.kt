@@ -5,12 +5,14 @@ import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,9 +47,8 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
     var isErroremail by remember {
         mutableStateOf(false)
     }
-    var isErrorpassword by remember {
-        mutableStateOf(false)
-    }
+    var isErrorpassword by remember { mutableStateOf(false) }
+    var passwordVisibility by remember { mutableStateOf(false) }
 
 //    LaunchedEffect(key1 = false) {
 //        setLoginResponse(mContext, loginViewModel, navController)
@@ -60,7 +62,7 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(Color(Teal200.toColorInt()))
+
     ) {
 
         var email by remember { mutableStateOf("") }
@@ -103,12 +105,18 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
                 isErrorpassword = it.length <= 3
             },
             leadingIcon = {
-                Icon(Icons.Default.Lock, contentDescription = "person")
+                IconButton(onClick = { passwordVisibility =!passwordVisibility }) {
+                    Icon(imageVector = if(passwordVisibility) Icons.Default.LockOpen else Icons.Default.Lock, contentDescription = "visibility" )
+                }
             },
+
             label = { Text(text = "Enter Password") }, modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 20.dp, end = 20.dp, top = 15.dp),
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if(passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+//            trailingIcon = {
+//
+//            },
             isError = isErrorpassword,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
 
@@ -118,21 +126,27 @@ fun LoginScreen(loginViewModel: LoginViewModel, navController: NavController) {
             showError(errorText = "password Length is Small", errorcheck = isErrorpassword)
         }
 
+        Text(text = "Forget Password ?", fontSize = 20.sp, textAlign = TextAlign.End, fontWeight = FontWeight.SemiBold
+            , modifier = Modifier.padding(end = 14.dp, top = 7.dp).fillMaxWidth().clickable {
+
+                navController.navigate(Screen.ForgetPassword.route)
+            })
+
         Button(onClick = {
-                if (checkEmail(email, mContext) && checkPassword(passWord, mContext)) {
-
-                    loginViewModel.loginUser(LoginDataModel(email,passWord))
-
-                }
-            }, modifier = Modifier
+            if (checkEmail(email, mContext) && checkPassword(passWord, mContext)) {
+                loginViewModel.loginUser(LoginDataModel(email,passWord))
+            }
+        }, modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 50.dp, end = 50.dp, top = 15.dp),
-            shape = RoundedCornerShape(50.dp)
+            // .background(Color("#00ADB5".toColorInt()))
+            .padding(start = 20.dp, end = 20.dp, top = 7.dp)
         ) {
 
             Text(text = "Login", textAlign = TextAlign.Center)
         }
+
     }
+
 
 
 
